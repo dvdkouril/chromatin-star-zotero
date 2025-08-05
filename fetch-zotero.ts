@@ -4,7 +4,7 @@ let CHROMOSTAR_GROUP_ID = "5014170" as const;
 let MANUAL_SEARCH_COLLECTION_ID = "V47TH9U4" as const;
 
 export type ZoteroItem = z.infer<typeof zoteroItemSchema>;
-type Author = ZoteroItem["creators"][number];
+//type Author = ZoteroItem["creators"][number];
 
 /** An optional string that is transformed to undefined if it is an empty string. */
 let maybeStringSchema = z
@@ -155,13 +155,93 @@ async function fetchZoteroCollection(
   return items;
 }
 
+type ProcessedItem = {
+  zoteroItem: ZoteroItem;
+  assignedTo: string;
+  relevant: "yes" | "no" | "maybe";
+  tags: string[];
+};
+
+function processPapersAndTags(
+  fetchedItems: ZoteroItem[],
+): ProcessedItem[] {
+  const items: ProcessedItem[] = [];
+  for (let paper of fetchedItems) {
+    const paperTags: string[] = [];
+    let processedItem: ProcessedItem = {
+      zoteroItem: paper,
+      assignedTo: "Bára",
+      relevant: "maybe",
+      tags: paperTags,
+    };
+    for (let tag of paper.data.tags) {
+      if (
+        tag === "RELEVANT" || tag === "MAYBE RELEVANT" || tag === "NOT RELEVANT"
+      ) {
+        processedItem = {
+          ...processedItem,
+          relevant: tag === "RELEVANT"
+            ? "yes"
+            : tag === "MAYBE RELEVANT"
+            ? "maybe"
+            : "no",
+        };
+      } else if (
+        tag === "Bára" ||
+        tag === "Katka" ||
+        tag === "Jan" ||
+        tag === "Roxana" ||
+        tag === "David" ||
+        tag === "Adam"
+      ) {
+        processedItem = {
+          ...processedItem,
+          assignedTo: tag,
+        };
+      } else {
+        paperTags.push(tag);
+      }
+    }
+    processedItem = {
+      ...processedItem,
+      tags: paperTags,
+    };
+    items.push(processedItem);
+  }
+  return items;
+}
+
+function printTagsDistribution(items: ProcessedItem[]): Map<string, number> {
+  const tagCounts = new Map<string, number>();
+  for (const item of items) {
+    for (const tag of item.tags) {
+      tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+    }
+  }
+
+  // Sort tags by count in descending order
+  const sortedTags = Array.from(tagCounts.entries()).sort((a, b) =>
+    b[1] - a[1]
+  );
+
+  console.log("Tags distribution:");
+  for (const [tag, count] of sortedTags) {
+    console.log(`${tag}: ${count}`);
+  }
+
+  return tagCounts;
+}
+
 async function main() {
   let pubs = await fetchZoteroCollection(MANUAL_SEARCH_COLLECTION_ID);
   for (let pub of pubs) {
     console.log(`Title: ${pub.data.title}`);
     console.log(pub.data.tags);
   }
-  //console.log(JSON.stringify(pubs, null, 2));
+
+  let items = processPapersAndTags(pubs);
+
+  printTagsDistribution(items);
 }
 
 if (import.meta.main) {
