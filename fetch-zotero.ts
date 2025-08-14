@@ -237,6 +237,21 @@ function printTagsDistribution(items: ProcessedItem[]): Map<string, number> {
   return tagCounts;
 }
 
+async function writeJson(items: ProcessedItem[]) {
+  const simpleItems = items.map((item) => ({
+    title: item.zoteroItem.data.title,
+    authors: item.zoteroItem.data.creators.map((creator) =>
+      creator.name ?? `${creator.firstName} ${creator.lastName}`
+    ),
+    year: item.zoteroItem.data.date,
+    tags: item.tags,
+    assignedTo: item.assignedTo,
+    relevant: item.relevant,
+  }));
+
+  await Deno.writeTextFile("papers.json", JSON.stringify(simpleItems, null, 2));
+}
+
 async function main() {
   let pubs = await fetchZoteroCollection(MANUAL_SEARCH_COLLECTION_ID);
   for (let pub of pubs) {
@@ -247,6 +262,7 @@ async function main() {
   let items = processPapersAndTags(pubs);
 
   printTagsDistribution(items);
+  await writeJson(items);
 }
 
 if (import.meta.main) {
