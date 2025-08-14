@@ -1,5 +1,10 @@
 import { z } from "npm:zod@3.23.8";
 
+/*
+ * Basically copied from:
+ * https://github.com/hms-dbmi/gehlenborglab-website/blob/main/scripts/fetch-hidive-zotero-items.ts
+ */
+
 let CHROMOSTAR_GROUP_ID = "5014170" as const;
 let MANUAL_SEARCH_COLLECTION_ID = "V47TH9U4" as const;
 
