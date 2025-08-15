@@ -92,16 +92,16 @@ async function fetchZoteroCollection(
   let start = 0;
 
   /* We have in the library:
-	 * Book: "book"
-	 * Book Section: "bookSection"
-	 * Conference Paper: "conferencePaper"
-	 * Document: "document"
-	 * Journal Article: "journalArticle"
-	 * Preprint: "preprint"
-	 * Software: "computerProgram"
-	 * Thesis: "thesis"
-	 * Web Page: "webpage"
-	*/
+   * Book: "book"
+   * Book Section: "bookSection"
+   * Conference Paper: "conferencePaper"
+   * Document: "document"
+   * Journal Article: "journalArticle"
+   * Preprint: "preprint"
+   * Software: "computerProgram"
+   * Thesis: "thesis"
+   * Web Page: "webpage"
+  */
   const itemTypesWeHave = [
     "book",
     "bookSection",
@@ -240,10 +240,15 @@ function printTagsDistribution(items: ProcessedItem[]): Map<string, number> {
 async function writeJson(items: ProcessedItem[]) {
   const simpleItems = items.map((item) => ({
     title: item.zoteroItem.data.title,
-    authors: item.zoteroItem.data.creators.map((creator) =>
-      creator.name ?? `${creator.firstName} ${creator.lastName}`
-    ),
-    year: item.zoteroItem.data.date,
+    authors: item.zoteroItem.data.creators.map((creator) => {
+      if ("name" in creator) {
+        return creator.name;
+      } else {
+        return `${creator.firstName} ${creator.lastName}`;
+      }
+      // creator.name ?? `${creator.firstName} ${creator.lastName}`;
+    }),
+    // year: item.zoteroItem.data.date,
     tags: item.tags,
     assignedTo: item.assignedTo,
     relevant: item.relevant,
