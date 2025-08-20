@@ -4,6 +4,11 @@ The idea is to have an ultimate database of papers that visualize genomes in 3D
 space. The initial step is to process the data from the Kouril et al. 2025 VIS
 paper.
 
+Goals:
+- [ ] be able to filter out already reviewed papers from larger searches (e.g., "3D genome")
+- [ ] be able to add newly published publications
+- [ ] be able to check for single entries
+
 Steps:
 - [ ] process VIS paper corpus
     - [ ] try parsing out the .bib files from supplemental materials
