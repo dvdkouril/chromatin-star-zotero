@@ -2,6 +2,11 @@ import { Cite } from "npm:@citation-js/core";
 import "npm:@citation-js/plugin-bibtex";
 import "npm:@citation-js/plugin-csl";
 
+const inputFile1 = "./input/3d-chromatin/1-1000.bib";
+
+//~ load the file content as string:
+const bibFile1 = await Deno.readTextFile(inputFile1);
+
 // Your BibTeX string
 const bibtex = `
 @article{einstein1905,
@@ -17,11 +22,16 @@ const bibtex = `
 `;
 
 // Parse with Citation.js
-const cite = new Cite(bibtex);
+// const cite = new Cite(bibtex);
+const cite = new Cite(bibFile1);
 
-// Output in plain-text APA style
-console.log(cite.format("bibliography", {
-  format: "text",
-  template: "apa",
-  lang: "en",
-}));
+for (const entry of cite.data) {
+  console.log(entry.DOI);
+}
+
+// // Output in plain-text APA style
+// console.log(cite.format("bibliography", {
+//   format: "text",
+//   template: "apa",
+//   lang: "en",
+// }));
