@@ -7,6 +7,7 @@ import { z } from "npm:zod@3.23.8";
 
 let CHROMOSTAR_GROUP_ID = "5014170" as const;
 let MANUAL_SEARCH_COLLECTION_ID = "V47TH9U4" as const;
+let KOURILVIS2025_COLLECTION_ID = "LSC8T7XP" as const;
 
 export type ZoteroItem = z.infer<typeof zoteroItemSchema>;
 //type Author = ZoteroItem["creators"][number];
@@ -83,8 +84,8 @@ let zoteroItemSchema = z.object({
  * @param collectionId The ID of the collection to fetch items from.
  */
 async function fetchZoteroCollection(
-  collectionId: string,
-  groupId: string = CHROMOSTAR_GROUP_ID,
+  groupId: string,
+  collectionId?: string,
 ): Promise<ZoteroItem[]> {
   let baseUrl = new URL(`https://api.zotero.org/groups/${groupId}/`);
   let itemsPerPage = 100;
@@ -117,7 +118,8 @@ async function fetchZoteroCollection(
   const itemTypeString = itemTypesWeHave.join(" || ");
 
   while (true) {
-    let url = new URL(`collections/${collectionId}/items`, baseUrl);
+    const query = collectionId ? `collections/${collectionId}/items` : `items`;
+    let url = new URL(query, baseUrl);
     url.searchParams.set("format", "json");
     url.searchParams.set("include", "csljson,data");
     url.searchParams.set("itemType", itemTypeString);
@@ -258,15 +260,14 @@ async function writeJson(items: ProcessedItem[]) {
 }
 
 async function main() {
-  let pubs = await fetchZoteroCollection(MANUAL_SEARCH_COLLECTION_ID);
-  for (let pub of pubs) {
-    console.log(`Title: ${pub.data.title}`);
-    console.log(pub.data.tags);
-  }
+  let pubsAll = await fetchZoteroCollection(
+    CHROMOSTAR_GROUP_ID,
+  );
+  console.log(`Together: fetched ${pubsAll.length} items.`);
 
-  let items = processPapersAndTags(pubs);
+  let items = processPapersAndTags(pubsAll);
 
-  printTagsDistribution(items);
+  // printTagsDistribution(items);
   await writeJson(items);
 }
 
