@@ -31,7 +31,17 @@ jobs:
       - name: Fetch Zotero collection
         run: deno run -A fetch-zotero.ts # produces `papers.json`
 
+      - name: Verify papers.json was created
+        run: |
+          if [ ! -f papers.json ]; then
+            echo "Error: papers.json was not created"
+            exit 1
+          fi
+          echo "papers.json exists:"
+          ls -lh papers.json
+
       - name: Upload papers.json to Cloudflare R2
         run: |
-          uv run --with awscli aws s3 cp ./papers.json "s3://${R2_BUCKET_NAME}/" \
+          uv run --with awscli aws s3 cp papers.json "s3://${R2_BUCKET_NAME}/papers.json" \
             --endpoint-url "${R2_ENDPOINT_URL}"
+          echo "Upload completed successfully"
