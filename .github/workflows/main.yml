@@ -1,6 +1,8 @@
 name: Process Zotero lib to JSON (to Cloudflare)
-
+  
 on:
+  push:
+    branches: 'main'
   workflow_dispatch:
 
 permissions:
